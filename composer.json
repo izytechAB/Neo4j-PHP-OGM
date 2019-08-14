@@ -14,7 +14,7 @@
         "everyman/neo4jphp": "*"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
     "autoload": {
         "psr-0": {
             "izytechab": "lib/"
