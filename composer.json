@@ -1,5 +1,5 @@
 {
-    "name": "hirevoice/neo4jphp-ogm",
+    "name": "izytechab/neo4jphp-ogm",
     "type": "library",
     "description": "Doctrine2-style entity mapper for Neo4j graph database",
     "keywords": ["neo4j","graph","database","entity-mapper","doctrine"],
@@ -16,7 +16,7 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-0": {
-            "HireVoice": "lib/"
+            "izytechab": "lib/"
         }
     },
     "require-dev": {
