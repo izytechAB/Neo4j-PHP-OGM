@@ -13,7 +13,8 @@
         "doctrine/common": ">=2.2.0",
         "everyman/neo4jphp": "*"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true
     "autoload": {
         "psr-0": {
             "izytechab": "lib/"
