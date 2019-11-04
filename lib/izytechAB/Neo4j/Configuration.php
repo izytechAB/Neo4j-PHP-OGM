@@ -21,11 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j;
+namespace izytechAB\Neo4j;
 
 use Everyman\Neo4j\Client;
 use Everyman\Neo4j\Transport;
-use HireVoice\Neo4j\PathFinder\PathFinder;
+use izytechAB\Neo4j\PathFinder\PathFinder;
 
 class Configuration
 {
