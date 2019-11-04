@@ -21,13 +21,13 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\PathFinder;
+namespace izytechAB\Neo4j\PathFinder;
 
 use Everyman\Neo4j\Relationship;
-use HireVoice\Neo4j\EntityManager;
+use izytechAB\Neo4j\EntityManager;
 use Everyman\Neo4j\PathFinder as PathFinderImpl;
-use HireVoice\Neo4j\Proxy\Entity as Proxy;
-use HireVoice\Neo4j\Exception;
+use izytechAB\Neo4j\Proxy\Entity as Proxy;
+use izytechAB\Neo4j\Exception;
 
 /**
  * Path Finder implements path finding functions
