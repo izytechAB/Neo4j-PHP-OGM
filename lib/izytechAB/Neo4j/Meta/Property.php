@@ -1,0 +1,340 @@
+<?php
+/**
+ * Copyright (C) 2012 Louis-Philippe Huberdeau
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+namespace izytechAB\Neo4j\Meta;
+
+use Doctrine\Common\Annotations\Reader;
+use izytechAB\Neo4j\Annotation;
+use ReflectionProperty;
+
+class Property
+{
+    const AUTO = 'izytechAB\\Neo4j\\Annotation\\Auto';
+
+    const PROPERTY = 'izytechAB\\Neo4j\\Annotation\\Property';
+
+    const INDEX = 'izytechAB\\Neo4j\\Annotation\\Index';
+
+    const TO_MANY = 'izytechAB\\Neo4j\\Annotation\\ManyToMany';
+
+    const TO_ONE = 'izytechAB\\Neo4j\\Annotation\\ManyToOne';
+
+    const FORMAT_SCALAR = 'scalar';
+
+    const FORMAT_RELATION = 'relation';
+
+    const FORMAT_ARRAY = 'array';
+
+    const FORMAT_JSON = 'json';
+
+    const FORMAT_DATE = 'date';
+
+    /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
+     * @var ReflectionProperty
+     */
+    private $property;
+
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @var string
+     */
+    private $format = 'relation';
+    private $direction = 'direction';
+    private $traversed = true;
+
+    /**
+     * @var bool
+     */
+    private $writeOnly = false;
+
+    /**
+     * @var array
+     */
+    private $indexes = array();
+
+    /**
+     * @param Reader $reader
+     * @param ReflectionProperty $property
+     */
+    function __construct(Reader $reader, ReflectionProperty $property)
+    {
+        $this->reader = $reader;
+        $this->property = $property;
+        if ($this->isProperty() || $this->isRelation()) {
+            $this->name = $property->getName();
+        } else {
+            // as far as we know only relation list are collections with names we can 'normalize'
+            $this->name = Reflection::singularizeProperty($property->getName());
+        }
+
+        if ($this->isProperty()) {
+            foreach ($this->reader->getPropertyAnnotations($this->property) as $annotation) {
+                if ($annotation instanceof Annotation\Index) {
+                    $copy = clone $annotation;
+                    $copy->name = $copy->name ?: $this->property->class;
+                    $copy->field = $copy->field ?: $this->property->name;
+                    $copy->type = $copy->type ?: 'node';
+                    $this->indexes[] = $copy;
+                }
+            }
+        }
+
+        $property->setAccessible(true);
+    }
+
+    /**
+     * @return bool
+     */
+    function isProperty()
+    {
+        if ($annotation = $this->reader->getPropertyAnnotation($this->property, self::PROPERTY)) {
+            $this->format = $annotation->format;
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    function isRelation()
+    {
+        if ($annotation = $this->reader->getPropertyAnnotation($this->property, self::TO_ONE)) {
+            if ($annotation->relation) {
+                $this->name = $annotation->relation;
+            }
+
+            if ($annotation->direction) {
+                $this->direction = $annotation->direction;
+            }
+            
+            $this->traversed = !$annotation->readOnly;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    function isPrimaryKey()
+    {
+        return !!$this->reader->getPropertyAnnotation($this->property, self::AUTO);
+    }
+
+    /**
+     * @return bool
+     */
+    function isIndexed()
+    {
+        return !empty($this->indexes);
+    }
+
+    /**
+     * @return bool
+     */
+    function isTraversed()
+    {
+        return $this->traversed;
+    }
+
+    /**
+     * @return bool
+     */
+    function isWriteOnly()
+    {
+        return $this->writeOnly;
+    }
+
+    /**
+     * @return bool
+     */
+    function isRelationList()
+    {
+        if ($annotation = $this->reader->getPropertyAnnotation($this->property, self::TO_MANY)) {
+            if ($annotation->relation) {
+                $this->name = $annotation->relation;
+            }
+            
+            if ($annotation->direction) {
+                $this->direction = $annotation->direction;
+            }
+            
+            $this->traversed = ! $annotation->readOnly;
+            $this->writeOnly = $annotation->writeOnly;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    function isPrivate()
+    {
+        return $this->property->isPrivate();
+    }
+
+    /**
+     * @return array
+     */
+    function getIndexes()
+    {
+        return $this->indexes;
+    }
+
+    /**
+     * @param Object $entity
+     * @return mixed|null|string
+     */
+    function getValue($entity)
+    {
+        $raw = $this->property->getValue($entity);
+
+        switch ($this->format) {
+            case self::FORMAT_SCALAR:
+            case self::FORMAT_RELATION:
+            return $raw;
+
+            case self::FORMAT_ARRAY:
+            return serialize($raw);
+
+            case self::FORMAT_JSON:
+            return json_encode($raw);
+
+            case self::FORMAT_DATE:
+            if ($raw) {
+                $value = clone $raw;
+                $value->setTimezone(new \DateTimeZone('UTC'));
+
+                return $value->format('Y-m-d H:i:s');
+            } else {
+                return null;
+            }
+
+            default:
+                return $raw;
+        }
+    }
+
+    /**
+     * @param Object $entity
+     * @param mixed $value
+     */
+    function setValue($entity, $value)
+    {
+        switch ($this->format) {
+            case self::FORMAT_SCALAR:
+            case self::FORMAT_RELATION:
+            $this->property->setValue($entity, $value);
+            break;
+
+            case self::FORMAT_ARRAY:
+            $this->property->setValue($entity, unserialize($value));
+            break;
+
+            case self::FORMAT_JSON:
+            $this->property->setValue($entity, json_decode($value, true));
+            break;
+
+            case self::FORMAT_DATE:
+            $date = null;
+            if ($value) {
+                $date = new \DateTime($value . ' UTC');
+                $date->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+            }
+
+            $this->property->setValue($entity, $date);
+            break;
+
+            default:
+                $this->property->setValue($entity, $value);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    function getClass()
+    {
+        return $this->property->class;
+    }
+    
+    /**
+    * @return string
+    */
+    function getDirection()
+    {
+        return $this->direction;
+    }
+    
+    /**
+     * @return string
+     */
+    function getOriginalName()
+    {
+        return $this->property->getName();
+    }
+
+    /**
+     * @param $names
+     * @return bool
+     */
+    function matches($names)
+    {
+        foreach (func_get_args() as $name) {
+            if (0 === strcasecmp($name, $this->name)
+                || 0 === strcasecmp($name, $this->property->getName())
+                || 0 === strcasecmp($name, Reflection::singularizeProperty($this->property->getName()))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
