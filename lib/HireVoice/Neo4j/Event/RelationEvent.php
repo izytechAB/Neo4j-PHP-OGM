@@ -1,6 +1,6 @@
 <?php
 
-namespace HireVoice\Neo4j\Event;
+namespace izytechAB\Neo4j\Event;
 
 /**
  * Abstract class used for all relation events
