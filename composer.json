@@ -6,7 +6,8 @@
     "homepage": "https://github.com/lphuberdeau/Neo4j-PHP-OGM",
     "license": "MIT",
     "authors": [
-        {"name": "Louis-Philippe Huberdeau", "email": "lphuberdeau@gmail.com", "homepage": "http://lphuberdeau.com"}
+        {"name": "Louis-Philippe Huberdeau", "email": "lphuberdeau@gmail.com", "homepage": "http://lphuberdeau.com"},
+        {"name": "Thomas Alatal Berg", "email": "thomas@izytech.se", "homepage": "http://izytech.ses"}
     ],
     "require": {
         "php": ">=5.3.2",
@@ -17,7 +18,7 @@
     "prefer-stable": true,
     "autoload": {
         "psr-0": {
-            "izytechab": "lib/"
+            "izytechAB": "lib/"
         }
     },
     "require-dev": {
