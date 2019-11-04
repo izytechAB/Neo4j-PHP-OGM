@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\Extension;
+namespace izytechAB\Neo4j\Extension;
 
 class GetNodeRelationshipsLight extends \Everyman\Neo4j\Command\GetNodeRelationships
 {
