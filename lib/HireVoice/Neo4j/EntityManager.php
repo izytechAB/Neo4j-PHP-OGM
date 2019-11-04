@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j;
+namespace izytechAB\Neo4j;
 
 use Doctrine\Common\EventManager;
 use Everyman\Neo4j\Client,
@@ -32,8 +32,8 @@ use Everyman\Neo4j\Client,
     Everyman\Neo4j\Gremlin\Query as InternalGremlinQuery,
     Everyman\Neo4j\Cypher\Query as InternalCypherQuery;
 use Everyman\Neo4j\Index\NodeFulltextIndex;
-use HireVoice\Neo4j\Event as Events;
-use HireVoice\Neo4j\Event\Event;
+use izytechAB\Neo4j\Event as Events;
+use izytechAB\Neo4j\Event\Event;
 
 /**
  * The entity manager handles the communication with the database server and
