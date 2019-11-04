@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\Meta;
+namespace izytechAB\Neo4j\Meta;
 
 use Doctrine\Common\Annotations\Reader;
 use HireVoice\Neo4j\Annotation;
