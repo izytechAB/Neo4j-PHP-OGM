@@ -1,5 +1,4 @@
 <?php
-
 namespace HireVoice\Neo4j\Event;
 
 use Doctrine\Common\EventArgs;
@@ -15,4 +14,5 @@ abstract class Event extends EventArgs
      * @return string
      */
     abstract public function getEventName();
+    
 }
