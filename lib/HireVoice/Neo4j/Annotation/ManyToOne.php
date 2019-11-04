@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-namespace HireVoice\Neo4j\Annotation;
+namespace izytechAB\Neo4j\Annotation;
 
 /**
  * @Annotation
