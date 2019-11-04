@@ -1,5 +1,5 @@
 <?php
-namespace HireVoice\Neo4j\Event;
+namespace izytechAB\Neo4j\Event;
 
 use Doctrine\Common\EventArgs;
 
